@@ -1,0 +1,153 @@
+name: Terraform
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'iac/**'
+      - '.github/workflows/terraform.yml'
+  pull_request:
+    paths:
+      - 'iac/**'
+  workflow_dispatch:
+    inputs:
+      action:
+        description: Operacao a executar
+        required: true
+        type: choice
+        options: [plan, apply, destroy]
+        default: plan
+      env:
+        description: Ambiente alvo
+        required: true
+        type: choice
+        options: [hml, prd]
+        default: hml
+
+permissions:
+  contents: read
+
+env:
+  AWS_REGION: us-east-1
+  TF_VERSION: 1.10.5
+
+jobs:
+  validar:
+    name: Formato e validacao
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+
+      - name: terraform fmt
+        run: terraform fmt -check -recursive iac/
+
+      - name: terraform validate por ambiente
+        run: |
+          for ambiente in hml prd; do
+            echo "::group::$ambiente"
+            terraform -chdir="iac/environments/$ambiente" init -backend=false -input=false
+            terraform -chdir="iac/environments/$ambiente" validate
+            echo "::endgroup::"
+          done
+
+  sql:
+    name: Sintaxe do SQL de roles
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_PASSWORD: postgres
+        options: >-
+          --health-cmd pg_isready --health-interval 5s
+          --health-timeout 5s --health-retries 10
+        ports: ['5432:5432']
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Aplica init-roles.sql num Postgres efemero
+        env:
+          PGPASSWORD: postgres
+        run: |
+          psql -v ON_ERROR_STOP=1 -h localhost -U postgres -d postgres \
+            -v flyway_user=flyway_user -v flyway_pass=trocar \
+            -v app_user=app_user       -v app_pass=trocar \
+            -f scripts/init-roles.sql
+
+      - name: Reaplica para provar idempotencia
+        env:
+          PGPASSWORD: postgres
+        run: |
+          psql -v ON_ERROR_STOP=1 -h localhost -U postgres -d postgres \
+            -v flyway_user=flyway_user -v flyway_pass=trocar \
+            -v app_user=app_user       -v app_pass=trocar \
+            -f scripts/init-roles.sql
+
+  terraform:
+    name: ${{ inputs.action }} em ${{ inputs.env }}
+    if: github.event_name == 'workflow_dispatch'
+    needs: [validar, sql]
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.env }}
+    defaults:
+      run:
+        working-directory: iac/environments/${{ inputs.env }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+
+      - name: Configurar credenciais AWS
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: terraform init
+        run: terraform init -input=false
+
+      - name: Conferir se a rede do ambiente ja foi aplicada
+        run: |
+          if ! terraform plan -input=false -detailed-exitcode -out=plano 2>plan.err; then
+            codigo=$?
+            if grep -qi "terraform_remote_state\|no state\|Unsupported attribute" plan.err; then
+              echo "::error::O state de rede do ambiente ${{ inputs.env }} nao existe ou nao expoe vpc_id/private_subnet_ids."
+              echo "::error::Aplique primeiro iac/network/${{ inputs.env }} no repositorio service-track-aws-iac."
+            fi
+            cat plan.err
+            [ "$codigo" -eq 2 ] || exit "$codigo"
+          fi
+
+      - name: apply
+        if: inputs.action == 'apply'
+        run: terraform apply -input=false -auto-approve plano
+
+      - name: destroy
+        if: inputs.action == 'destroy'
+        run: terraform destroy -input=false -auto-approve
+
+      - name: Resumo
+        if: inputs.action == 'apply'
+        run: |
+          {
+            echo "### Banco de ${{ inputs.env }}"
+            echo
+            echo "- endpoint: \`$(terraform output -raw rds_endpoint)\`"
+            echo "- multi-AZ: \`$(terraform output -raw multi_az)\`"
+            echo "- parametros publicados em: \`/$(terraform output -raw ssm_prefix)/db/\`"
+            echo
+            echo "Orcamento de conexoes:"
+            echo '```json'
+            terraform output -json orcamento_de_conexoes
+            echo '```'
+            echo
+            echo "Proximo passo: aplicar o stack em service-track-aws-iac."
+          } >> "$GITHUB_STEP_SUMMARY"
