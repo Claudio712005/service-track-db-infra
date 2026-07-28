@@ -15,6 +15,8 @@ fi
 : "${FLYWAY_DB_PASSWORD:?defina FLYWAY_DB_PASSWORD}"
 : "${APP_DB_USER:?defina APP_DB_USER}"
 : "${APP_DB_PASSWORD:?defina APP_DB_PASSWORD}"
+: "${READONLY_DB_USER:=readonly_user}"
+: "${READONLY_DB_PASSWORD:?defina READONLY_DB_PASSWORD}"
 
 RAIZ="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 PREFIXO="/servicetrack/${AMBIENTE}/db"
@@ -27,11 +29,27 @@ BANCO="$(ler "$PREFIXO/name")"
 MASTER="$(ler "$PREFIXO/username")"
 export PGPASSWORD="$(ler "$PREFIXO/password")"
 
-echo ">> aplicando roles em ${AMBIENTE} (${HOST})"
-psql -v ON_ERROR_STOP=1 \
-  --host "$HOST" --port "$PORTA" --username "$MASTER" --dbname "$BANCO" \
-  -v flyway_user="$FLYWAY_DB_USER" -v flyway_pass="$FLYWAY_DB_PASSWORD" \
-  -v app_user="$APP_DB_USER"       -v app_pass="$APP_DB_PASSWORD" \
+TETO="$(ler "$PREFIXO/max-connections")"
+
+psql_master() {
+  psql -v ON_ERROR_STOP=1 \
+    --host "$HOST" --port "$PORTA" --username "$MASTER" --dbname "$BANCO" "$@"
+}
+
+echo ">> extensoes em ${AMBIENTE} (${HOST})"
+psql_master -f "$RAIZ/scripts/init-extensoes.sql"
+
+echo ">> roles em ${AMBIENTE}"
+psql_master \
+  -v flyway_user="$FLYWAY_DB_USER"     -v flyway_pass="$FLYWAY_DB_PASSWORD" \
+  -v app_user="$APP_DB_USER"           -v app_pass="$APP_DB_PASSWORD" \
+  -v readonly_user="$READONLY_DB_USER" -v readonly_pass="$READONLY_DB_PASSWORD" \
   -f "$RAIZ/scripts/init-roles.sql"
 
-echo ">> flyway_user e app_user provisionados."
+echo ">> verificando o estado esperado"
+psql_master \
+  -v flyway_user="$FLYWAY_DB_USER" \
+  -v app_user="$APP_DB_USER" \
+  -v readonly_user="$READONLY_DB_USER" \
+  -v teto_esperado="$TETO" \
+  -f "$RAIZ/scripts/verificar-banco.sql"
