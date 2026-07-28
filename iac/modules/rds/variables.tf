@@ -64,17 +64,7 @@ variable "db_backup_retention_days" {
 }
 
 variable "db_max_connections" {
-  description = <<-EOT
-    Teto de conexoes do PostgreSQL. Precisa acomodar a soma dos pools de todos os
-    consumidores mais folga administrativa:
-
-      API   = replicas do HPA x (pool default + pool de migracao)
-      Lambda = concorrencia x pool por container
-      folga  = superusuario, manutencao e o job de bootstrap
-
-    Sem esse calculo o HPA derruba o banco justamente sob a carga que ele existe
-    para atender.
-  EOT
+  description = "Teto de conexoes do PostgreSQL. Precisa acomodar a soma dos pools de todos os consumidores mais folga administrativa. Ver DB-ADR-004."
   type        = number
 }
 
@@ -99,11 +89,7 @@ variable "pool_api_migration_max_size" {
 }
 
 variable "pool_lambda_max_size" {
-  description = <<-EOT
-    Conexoes maximas por container da Lambda. A Lambda atende uma requisicao por
-    container de cada vez, entao qualquer valor acima de 2 e desperdicio e
-    aumenta a chance de esgotar o banco sob concorrencia.
-  EOT
+  description = "Conexoes maximas por container da funcao de autenticacao. Ela atende uma requisicao por vez, entao acima de 2 e desperdicio."
   type        = number
 }
 

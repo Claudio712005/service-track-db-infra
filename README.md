@@ -15,7 +15,7 @@ e borda) e [service-track-lambda](https://github.com/Claudio712005/service-track
 
 - Instância RDS PostgreSQL, subnet group, security group e parameter group.
 - **Orçamento de conexões** do banco e o tamanho de pool de cada consumidor.
-- Roles de runtime (`flyway_user`, `app_user`) e seus privilégios.
+- Roles de runtime (`flyway_user`, `app_user`, `readonly_user`) e seus privilégios.
 - Publicação de endpoint, credenciais e orçamento no SSM Parameter Store.
 
 ## Do que **não** é dono
@@ -60,7 +60,7 @@ zero. A ordem abaixo vale para **toda** recriação.
 | 1 | `service-track-aws-iac` → esteira **Network** | VPC e subnets do ambiente |
 | 2 | **este repositório** → esteira **Terraform** | RDS, parameter group, SSM |
 | 3 | `service-track-aws-iac` → esteira **Terraform** | EKS, Lambda, gateway, ingress no SG do banco |
-| 4 | este repositório → `scripts/aplicar-roles.sh` | roles `flyway_user` e `app_user` |
+| 4 | este repositório → `scripts/aplicar-roles.sh` | extensões, roles e verificação do estado esperado |
 
 Pular a fase 1 faz o plan daqui falhar com erro explícito apontando o que aplicar antes.
 
@@ -138,6 +138,7 @@ outputs, nunca de anotação.
 |---|---|---|
 | `flyway_user` | aplicar migrations | `USAGE, CREATE` no schema `public` |
 | `app_user` | runtime da aplicação | `SELECT, INSERT, UPDATE, DELETE`; **não altera estrutura** |
+| `readonly_user` | diagnóstico e observabilidade | `SELECT`; `default_transaction_read_only = on` |
 
 O usuário master só é usado para criar as roles. `CREATE` no schema `public` é revogado de
 `PUBLIC`.
@@ -146,10 +147,43 @@ O usuário master só é usado para criar as roles. `CREATE` no schema `public` 
 duas vezes seguidas contra um PostgreSQL efêmero.
 
 ```bash
-export FLYWAY_DB_USER=flyway_user FLYWAY_DB_PASSWORD=...
-export APP_DB_USER=app_user       APP_DB_PASSWORD=...
+export FLYWAY_DB_USER=flyway_user     FLYWAY_DB_PASSWORD=...
+export APP_DB_USER=app_user           APP_DB_PASSWORD=...
+export READONLY_DB_USER=readonly_user READONLY_DB_PASSWORD=...
 scripts/aplicar-roles.sh hml
 ```
+
+O script aplica extensões, roles e a verificação, nesta ordem.
+
+---
+
+## Scripts SQL
+
+Tudo aqui é **infraestrutura de banco**, nunca DDL de tabela: o schema pertence às migrations
+Flyway da aplicação (`DB-ADR-002`).
+
+| Script | O que faz | Quando roda |
+|---|---|---|
+| `init-extensoes.sql` | `pg_stat_statements` para diagnóstico de consulta lenta | fase 4, antes das roles |
+| `init-roles.sql` | cria `flyway_user`, `app_user`, `readonly_user` e seus privilégios; revoga `CREATE` de `PUBLIC` | fase 4 |
+| `verificar-banco.sql` | confere que o estado esperado foi atingido; imprime `ok` ou `FALHOU` por item | fase 4, ao final |
+| `diagnostico.sql` | conexões por usuário, consultas mais lentas, maiores tabelas, bloqueios em espera | sob demanda |
+
+Todos são idempotentes. A esteira aplica extensões e roles **duas vezes seguidas** contra um
+PostgreSQL efêmero e roda a verificação, porque eles executam a cada recriação de ambiente e
+precisam ser seguros na segunda vez.
+
+`pg_stat_statements` exige `shared_preload_libraries`, que é `pending-reboot` no RDS. Como
+todo ambiente aqui nasce novo, isso é aplicado na criação e não custa reinicialização.
+
+### O que deliberadamente não existe aqui
+
+| | Por quê |
+|---|---|
+| DDL de tabelas, índices, seed | Pertence às migrations da aplicação (`DB-ADR-002`). Duplicar criaria duas verdades sobre o schema. |
+| `CREATE DATABASE` | O RDS já cria o banco a partir de `db_name`. Um script seria código morto que nunca roda no fluxo real. |
+| `uuid-ossp`, `pgcrypto` | Nenhuma é usada: `uuid` e `numeric` são tipos nativos e os identificadores são gerados na aplicação. |
+| Schema dedicado no lugar de `public` | Melhoria real de isolamento, mas quebra `search_path`, Flyway e Hibernate. É mudança de arquitetura, não script — merece RFC própria. |
 
 ---
 

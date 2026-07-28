@@ -4,9 +4,6 @@ locals {
   name        = "${local.project}-${local.environment}"
 }
 
-# A rede pertence ao repositorio de infraestrutura e e aplicada antes deste
-# state. Ler daqui e o que quebra a dependencia circular: o banco entra numa
-# VPC existente em vez de exigir que a infraestrutura conheca o banco.
 data "terraform_remote_state" "network" {
   backend = "s3"
 
