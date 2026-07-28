@@ -55,13 +55,14 @@ jobs:
           done
 
   sql:
-    name: Sintaxe do SQL de roles
+    name: SQL de bootstrap do banco
     runs-on: ubuntu-latest
     services:
       postgres:
         image: postgres:16-alpine
         env:
           POSTGRES_PASSWORD: postgres
+          POSTGRES_INITDB_ARGS: -c shared_preload_libraries=pg_stat_statements
         options: >-
           --health-cmd pg_isready --health-interval 5s
           --health-timeout 5s --health-retries 10
@@ -69,23 +70,50 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Aplica init-roles.sql num Postgres efemero
+      - name: Extensoes
+        env:
+          PGPASSWORD: postgres
+        run: psql -v ON_ERROR_STOP=1 -h localhost -U postgres -d postgres -f scripts/init-extensoes.sql
+
+      - name: Roles
         env:
           PGPASSWORD: postgres
         run: |
           psql -v ON_ERROR_STOP=1 -h localhost -U postgres -d postgres \
-            -v flyway_user=flyway_user -v flyway_pass=trocar \
-            -v app_user=app_user       -v app_pass=trocar \
+            -v flyway_user=flyway_user     -v flyway_pass=trocar \
+            -v app_user=app_user           -v app_pass=trocar \
+            -v readonly_user=readonly_user -v readonly_pass=trocar \
             -f scripts/init-roles.sql
 
-      - name: Reaplica para provar idempotencia
+      - name: Reaplica tudo para provar idempotencia
         env:
           PGPASSWORD: postgres
         run: |
+          psql -v ON_ERROR_STOP=1 -h localhost -U postgres -d postgres -f scripts/init-extensoes.sql
           psql -v ON_ERROR_STOP=1 -h localhost -U postgres -d postgres \
-            -v flyway_user=flyway_user -v flyway_pass=trocar \
-            -v app_user=app_user       -v app_pass=trocar \
+            -v flyway_user=flyway_user     -v flyway_pass=trocar \
+            -v app_user=app_user           -v app_pass=trocar \
+            -v readonly_user=readonly_user -v readonly_pass=trocar \
             -f scripts/init-roles.sql
+
+      - name: Verifica o estado esperado
+        env:
+          PGPASSWORD: postgres
+        run: |
+          saida=$(psql -qAt -v ON_ERROR_STOP=1 -h localhost -U postgres -d postgres \
+            -v flyway_user=flyway_user -v app_user=app_user \
+            -v readonly_user=readonly_user -v teto_esperado=100 \
+            -f scripts/verificar-banco.sql)
+          echo "$saida"
+          if echo "$saida" | grep -q FALHOU; then
+            echo "::error::verificar-banco.sql reprovou"
+            exit 1
+          fi
+
+      - name: Diagnostico executa sem erro
+        env:
+          PGPASSWORD: postgres
+        run: psql -v ON_ERROR_STOP=1 -h localhost -U postgres -d postgres -f scripts/diagnostico.sql >/dev/null
 
   terraform:
     name: ${{ inputs.action }} em ${{ inputs.env }}
