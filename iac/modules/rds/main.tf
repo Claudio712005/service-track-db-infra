@@ -9,10 +9,6 @@ resource "aws_db_subnet_group" "this" {
   tags       = var.tags
 }
 
-# O SG nasce sem regras de entrada. Quem tem os security groups consumidores
-# (nodes do EKS, Lambda de autenticacao) e o repositorio de infraestrutura, e e
-# la que as regras de ingress sao criadas apontando para este SG. Sem essa
-# inversao os dois states dependeriam um do outro.
 resource "aws_security_group" "rds" {
   name        = "${var.name}-rds-sg"
   description = "PostgreSQL access from allowed security groups only"
@@ -51,6 +47,17 @@ resource "aws_db_parameter_group" "this" {
     value = tostring(var.db_log_min_duration_ms)
   }
 
+  parameter {
+    name         = "shared_preload_libraries"
+    value        = "pg_stat_statements"
+    apply_method = "pending-reboot"
+  }
+
+  parameter {
+    name  = "pg_stat_statements.track"
+    value = "all"
+  }
+
   tags = var.tags
 
   lifecycle {
@@ -83,8 +90,6 @@ resource "aws_db_instance" "this" {
   tags = var.tags
 }
 
-# Ponte entre os states: o repositorio de infraestrutura le estes parametros
-# em tempo de apply para configurar a Lambda e os secrets da aplicacao.
 resource "aws_ssm_parameter" "endpoint" {
   name  = "/${var.ssm_prefix}/db/endpoint"
   type  = "String"
@@ -141,9 +146,6 @@ resource "aws_ssm_parameter" "max_connections" {
   tags  = var.tags
 }
 
-# Orcamento de conexoes por consumidor. Declarado aqui, junto do teto do banco,
-# para que a soma seja verificavel num lugar so. Os consumidores leem estes
-# valores e os aplicam nos respectivos pools.
 resource "aws_ssm_parameter" "pool_api_max_size" {
   name  = "/${var.ssm_prefix}/db/pool/api-max-size"
   type  = "String"
@@ -165,8 +167,6 @@ resource "aws_ssm_parameter" "pool_lambda_max_size" {
   tags  = var.tags
 }
 
-# Falha o plan quando a soma dos pools passa do teto do banco. Sem isso o
-# estouro so apareceria em producao, sob a carga que o HPA existe para atender.
 locals {
   conexoes_api    = var.app_replicas_max * (var.pool_api_max_size + var.pool_api_migration_max_size)
   conexoes_lambda = var.lambda_concurrency_estimate * var.pool_lambda_max_size
