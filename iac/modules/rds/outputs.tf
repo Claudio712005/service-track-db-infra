@@ -50,3 +50,8 @@ output "orcamento_de_conexoes" {
     total_usado = local.conexoes_totais
   }
 }
+
+output "roles_de_runtime" {
+  description = "Usuarios das roles. As senhas ficam apenas no SSM."
+  value       = var.roles_de_runtime
+}

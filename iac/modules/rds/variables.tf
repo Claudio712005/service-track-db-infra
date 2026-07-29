@@ -102,3 +102,13 @@ variable "lambda_concurrency_estimate" {
   description = "Concorrencia estimada da Lambda. Usada apenas para conferir o orcamento de conexoes."
   type        = number
 }
+
+variable "roles_de_runtime" {
+  description = "Roles criadas no banco. A senha de cada uma e gerada aqui e publicada no SSM."
+  type        = map(string)
+  default = {
+    app      = "app_user"
+    flyway   = "flyway_user"
+    readonly = "readonly_user"
+  }
+}

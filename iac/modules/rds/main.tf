@@ -3,6 +3,13 @@ resource "random_password" "db" {
   special = false
 }
 
+resource "random_password" "roles" {
+  for_each = toset(["app", "flyway", "readonly"])
+
+  length  = 24
+  special = false
+}
+
 resource "aws_db_subnet_group" "this" {
   name       = "${var.name}-db-subnet-group"
   subnet_ids = var.private_subnet_ids
@@ -157,6 +164,24 @@ resource "aws_ssm_parameter" "pool_api_migration_max_size" {
   name  = "/${var.ssm_prefix}/db/pool/api-migration-max-size"
   type  = "String"
   value = tostring(var.pool_api_migration_max_size)
+  tags  = var.tags
+}
+
+resource "aws_ssm_parameter" "role_usuario" {
+  for_each = var.roles_de_runtime
+
+  name  = "/${var.ssm_prefix}/db/roles/${each.key}/usuario"
+  type  = "String"
+  value = each.value
+  tags  = var.tags
+}
+
+resource "aws_ssm_parameter" "role_senha" {
+  for_each = var.roles_de_runtime
+
+  name  = "/${var.ssm_prefix}/db/roles/${each.key}/senha"
+  type  = "SecureString"
+  value = random_password.roles[each.key].result
   tags  = var.tags
 }
 
