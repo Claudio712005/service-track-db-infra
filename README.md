@@ -126,6 +126,8 @@ Sob `/servicetrack/<env>/db/`:
 | `security-group-id` | String | infraestrutura, para criar o ingress |
 | `max-connections` | String | diagnóstico |
 | `pool/api-max-size`, `pool/api-migration-max-size`, `pool/lambda-max-size` | String | infraestrutura, para configurar os pools |
+| `roles/<role>/usuario` | String | bootstrap de roles, secrets do Kubernetes |
+| `roles/<role>/senha` | **SecureString** | bootstrap de roles, secrets do Kubernetes |
 
 A URL, o endereço e a senha **mudam a cada recriação do ambiente**. Ler sempre do SSM ou dos
 outputs, nunca de anotação.
@@ -147,11 +149,11 @@ O usuário master só é usado para criar as roles. `CREATE` no schema `public` 
 duas vezes seguidas contra um PostgreSQL efêmero.
 
 ```bash
-export FLYWAY_DB_USER=flyway_user     FLYWAY_DB_PASSWORD=...
-export APP_DB_USER=app_user           APP_DB_PASSWORD=...
-export READONLY_DB_USER=readonly_user READONLY_DB_PASSWORD=...
 scripts/aplicar-roles.sh hml
 ```
+
+Sem variáveis de ambiente: usuários e senhas são gerados no apply e lidos do SSM
+(`DB-ADR-005`).
 
 O script aplica extensões, roles e a verificação, nesta ordem.
 
@@ -227,3 +229,4 @@ Antes de qualquer esteira, renovar `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY` 
 | [DB-ADR-002](docs/adr/DB-ADR-002-flyway-dono-do-schema.md) | Flyway na aplicação é dono do schema |
 | [DB-ADR-003](docs/adr/DB-ADR-003-fronteira-entre-rede-e-banco.md) | Fronteira entre rede e banco, e o ingress invertido |
 | [DB-ADR-004](docs/adr/DB-ADR-004-orcamento-de-conexoes.md) | Orçamento de conexões como configuração versionada |
+| [DB-ADR-005](docs/adr/DB-ADR-005-senhas-de-role-geradas-e-publicadas.md) | Senhas das roles geradas aqui e publicadas no SSM |
