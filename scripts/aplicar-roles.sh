@@ -1,7 +1,4 @@
 #!/usr/bin/env bash
-# Aplica as roles de runtime no banco do ambiente informado.
-# Le endpoint e credenciais do master a partir do SSM publicado pelo terraform.
-# Idempotente. Requer psql e AWS CLI autenticada.
 
 set -euo pipefail
 
@@ -10,13 +7,6 @@ if [ -z "$AMBIENTE" ]; then
   echo "uso: $0 <hml|prd>" >&2
   exit 1
 fi
-
-: "${FLYWAY_DB_USER:?defina FLYWAY_DB_USER}"
-: "${FLYWAY_DB_PASSWORD:?defina FLYWAY_DB_PASSWORD}"
-: "${APP_DB_USER:?defina APP_DB_USER}"
-: "${APP_DB_PASSWORD:?defina APP_DB_PASSWORD}"
-: "${READONLY_DB_USER:=readonly_user}"
-: "${READONLY_DB_PASSWORD:?defina READONLY_DB_PASSWORD}"
 
 RAIZ="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 PREFIXO="/servicetrack/${AMBIENTE}/db"
@@ -28,6 +18,13 @@ PORTA="$(ler "$PREFIXO/port")"
 BANCO="$(ler "$PREFIXO/name")"
 MASTER="$(ler "$PREFIXO/username")"
 export PGPASSWORD="$(ler "$PREFIXO/password")"
+
+FLYWAY_DB_USER="$(ler "$PREFIXO/roles/flyway/usuario")"
+FLYWAY_DB_PASSWORD="$(ler "$PREFIXO/roles/flyway/senha")"
+APP_DB_USER="$(ler "$PREFIXO/roles/app/usuario")"
+APP_DB_PASSWORD="$(ler "$PREFIXO/roles/app/senha")"
+READONLY_DB_USER="$(ler "$PREFIXO/roles/readonly/usuario")"
+READONLY_DB_PASSWORD="$(ler "$PREFIXO/roles/readonly/senha")"
 
 TETO="$(ler "$PREFIXO/max-connections")"
 

@@ -1,6 +1,4 @@
 #!/usr/bin/env bash
-# Compara o uso real de conexoes com o orcamento declarado no terraform.
-# Somente leitura. Requer psql e AWS CLI autenticada.
 
 set -euo pipefail
 
