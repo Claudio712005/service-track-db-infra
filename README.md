@@ -189,6 +189,21 @@ todo ambiente aqui nasce novo, isso é aplicado na criação e não custa reinic
 
 ---
 
+## Modelagem
+
+[docs/modelagem/modelo-entidade-relacionamento.md](docs/modelagem/modelo-entidade-relacionamento.md)
+— diagrama ER, cardinalidades, chaves e restrições do modelo relacional.
+
+O documento **descreve** o schema; não o define. A fonte de verdade continua sendo as
+migrations Flyway da aplicação (`DB-ADR-002`). Alterou migration, atualize o documento no
+mesmo ciclo, senão ele vira ficção.
+
+Ele também registra nove divergências conhecidas de modelagem — entre elas quatro relações sem
+chave estrangeira e um `insumo_id` declarado como `varchar` contra um `uuid` do outro lado.
+Nenhuma está corrigida: correção de schema é migration nova, e migrations são append-only.
+
+---
+
 ## Pré-requisitos
 
 - Terraform >= 1.10.0
