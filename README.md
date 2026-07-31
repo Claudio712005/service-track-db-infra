@@ -81,6 +81,12 @@ Destruir é a ordem inversa: stack → banco → rede.
 Multi-AZ praticamente dobra o custo da instância. HML é o ambiente enxuto por decisão de
 orçamento e o mais recriado, então roda em AZ única; PRD tem standby síncrono.
 
+A classe de PRD não é preferência: o teto de conexões do RDS é derivado da memória
+(`db.t3.micro` ≈ 112, `db.t3.medium` ≈ 450) e o orçamento de PRD exige 220. `db.t3.micro` não
+cabe. A aritmética completa, o custo de cada ambiente e as alternativas descartadas estão em
+[`DB-ADR-006`](docs/adr/DB-ADR-006-dimensionamento-do-rds-por-ambiente.md) e
+[`DB-RFC-001`](docs/rfc/DB-RFC-001-dimensionamento-do-rds.md).
+
 ---
 
 ## Orçamento de conexões
@@ -245,3 +251,10 @@ Antes de qualquer esteira, renovar `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY` 
 | [DB-ADR-003](docs/adr/DB-ADR-003-fronteira-entre-rede-e-banco.md) | Fronteira entre rede e banco, e o ingress invertido |
 | [DB-ADR-004](docs/adr/DB-ADR-004-orcamento-de-conexoes.md) | Orçamento de conexões como configuração versionada |
 | [DB-ADR-005](docs/adr/DB-ADR-005-senhas-de-role-geradas-e-publicadas.md) | Senhas das roles geradas aqui e publicadas no SSM |
+| [DB-ADR-006](docs/adr/DB-ADR-006-dimensionamento-do-rds-por-ambiente.md) | Classe, storage, Multi-AZ e backup de cada ambiente |
+
+### RFCs
+
+| RFC | Assunto |
+|---|---|
+| [DB-RFC-001](docs/rfc/DB-RFC-001-dimensionamento-do-rds.md) | Dimensionamento do RDS por ambiente, com custo e alternativas |

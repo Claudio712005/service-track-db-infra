@@ -6,6 +6,10 @@
 ## Status
 **Aceita**
 
+> A classe de instância que sustenta cada teto está em
+> [`DB-ADR-006`](DB-ADR-006-dimensionamento-do-rds-por-ambiente.md). Os dois documentos são
+> inseparáveis: o teto de conexões decide a classe, e a classe limita o teto.
+
 ## Contexto
 
 Nenhum dos consumidores tinha pool configurado. Aplicação e função de autenticação usavam o
