@@ -60,7 +60,7 @@ zero. A ordem abaixo vale para **toda** recriação.
 | 1 | `service-track-aws-iac` → esteira **Network** | VPC e subnets do ambiente |
 | 2 | **este repositório** → esteira **Terraform** | RDS, parameter group, SSM |
 | 3 | `service-track-aws-iac` → esteira **Terraform** | EKS, Lambda, gateway, ingress no SG do banco |
-| 4 | este repositório → `scripts/aplicar-roles.sh` | extensões, roles e verificação do estado esperado |
+| 4 | *automático* — hook `PreSync` do ArgoCD | extensões e roles, aplicadas de dentro do cluster |
 
 Pular a fase 1 faz o plan daqui falhar com erro explícito apontando o que aplicar antes.
 
@@ -162,6 +162,16 @@ Sem variáveis de ambiente: usuários e senhas são gerados no apply e lidos do 
 (`DB-ADR-005`).
 
 O script aplica extensões, roles e a verificação, nesta ordem.
+
+> **Em nuvem isto já é automático, e o script não alcança o banco de fora.** O RDS é
+> `publicly_accessible = false` e o security group dele só aceita os nodes do EKS e a Lambda —
+> um `psql` do seu laptop não chega lá. Quem aplica as roles em `hml` e `prd` é um Job em
+> `service-track-aws-iac`, em `kubernetes/k8s/components/db-init/`, marcado como hook `PreSync`
+> do ArgoCD: roda dentro do cluster, antes do Deployment, e falha a sync se não conseguir.
+>
+> Este script continua válido para rodar **de dentro da VPC** (bastion, pod ou runner na rede)
+> e para diagnóstico. As duas implementações precisam ser mantidas em paridade; hoje aplicam
+> exatamente as mesmas operações SQL.
 
 ---
 
