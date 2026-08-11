@@ -32,7 +32,7 @@ module "rds" {
 
   db_name                   = "servicetrack"
   db_username               = "servicetrack"
-  db_engine_version         = "16.4"
+  db_engine_version         = "16"
   db_parameter_group_family = "postgres16"
 
   db_instance_class        = "db.t3.micro"

@@ -46,7 +46,8 @@ variable "db_max_allocated_storage" {
 }
 
 variable "db_engine_version" {
-  type = string
+  description = "Versao maior do PostgreSQL. A AWS escolhe a menor disponivel; fixar a menor quebra quando ela e descontinuada."
+  type        = string
 }
 
 variable "db_parameter_group_family" {
