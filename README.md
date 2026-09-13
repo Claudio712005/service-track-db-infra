@@ -207,7 +207,7 @@ todo ambiente aqui nasce novo, isso é aplicado na criação e não custa reinic
 
 ## Modelagem
 
-[docs/modelagem/modelo-entidade-relacionamento.md](docs/modelagem/modelo-entidade-relacionamento.md)
+[docs/modelagem/modelo-entidade-relacionamento.drawio](docs/modelagem/modelo-entidade-relacionamento.drawio)
 — diagrama ER, cardinalidades, chaves e restrições do modelo relacional.
 
 O documento **descreve** o schema; não o define. A fonte de verdade continua sendo as

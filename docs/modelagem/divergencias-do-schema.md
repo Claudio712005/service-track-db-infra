@@ -1,7 +1,7 @@
 # Divergências do schema
 
-Extraído de `modelo-entidade-relacionamento.md` em 13/09/2026, quando aquele documento passou
-a conter apenas o diagrama.
+Extraído do documento de modelagem em 13/09/2026, quando o diagrama passou a ser mantido em
+`modelo-entidade-relacionamento.drawio`.
 
 **Fonte de verdade:** as migrations Flyway em
 `service-track-api/software/service-track-api/_infrastructure/src/main/resources/db/migration/`.

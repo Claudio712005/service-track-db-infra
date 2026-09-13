@@ -4,7 +4,7 @@
       <root>
         <mxCell id="0"/>
         <mxCell id="1" parent="0"/>
-        <mxCell id="tit" value="ServiceTrack · Modelo entidade-relacionamento — schema &lt;b&gt;public&lt;/b&gt; do PostgreSQL 16&lt;br&gt;&lt;span style=&quot;font-size:11px;font-weight:normal&quot;&gt;Fonte de verdade: migrations Flyway V1__baseline_schema.sql e V3__update_notificacao_tipo_conteudo_constraint.sql, em service-track-api. O schema pertence à aplicação (DB-ADR-002) — este desenho descreve o resultado, não o define.&lt;/span&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#1B3A57;strokeColor=none;fontSize=17;fontStyle=1;fontColor=#FFFFFF;verticalAlign=middle;align=left;spacingLeft=20;" vertex="1" parent="1">
+        <mxCell id="tit" value="ServiceTrack · Modelo entidade-relacionamento" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#1B3A57;strokeColor=none;fontSize=17;fontStyle=1;fontColor=#FFFFFF;verticalAlign=middle;align=left;spacingLeft=20;" vertex="1" parent="1">
           <mxGeometry x="36" y="26" width="1964" height="62" as="geometry"/>
         </mxCell>
         <mxCell id="t_usuario_roles" value="usuario_roles" style="swimlane;fontStyle=1;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;html=1;whiteSpace=wrap;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontColor=#1A3E6E;fontSize=12;align=center;arcSize=6;rounded=1;" vertex="1" parent="1">
@@ -376,15 +376,6 @@
         <mxCell id="chk" value="Domínios fechados por CHECK" style="rounded=1;arcSize=6;whiteSpace=wrap;html=1;fillColor=#FFFDF5;strokeColor=#E0C878;verticalAlign=top;align=left;spacingLeft=10;spacingTop=2;fontSize=11;fontStyle=1;fontColor=#7A5C00;" vertex="1" parent="1">
           <mxGeometry x="455" y="700" width="375" height="430" as="geometry"/>
         </mxCell>
-        <mxCell id="chkt" value="&lt;i&gt;Enums da aplicação espelhados no banco.&lt;/i&gt;&lt;br&gt;&lt;br&gt;&lt;b&gt;usuario_roles.role&lt;/b&gt;&lt;br&gt;CLIENTE · MECANICO&lt;br&gt;&lt;br&gt;&lt;b&gt;mecanicos.nivel&lt;/b&gt;&lt;br&gt;JUNIOR · PLENO · SENIOR&lt;br&gt;&lt;br&gt;&lt;b&gt;ordens_servico.status&lt;/b&gt;&lt;br&gt;CANCELADA · RECEBIDA · EM_DIAGNOSTICO ·&lt;br&gt;AGUARDANDO_APROVACAO · EM_EXECUCAO ·&lt;br&gt;FINALIZADA · ENTREGUE&lt;br&gt;&lt;br&gt;&lt;b&gt;veiculos.ativo&lt;/b&gt;&lt;br&gt;S · N&amp;nbsp;&amp;nbsp;&lt;span style=&quot;color:#C62828&quot;&gt;(varchar, não boolean — M-06)&lt;/span&gt;&lt;br&gt;&lt;br&gt;&lt;b&gt;notificacoes.tipo_notificacao&lt;/b&gt;&lt;br&gt;EMAIL&lt;br&gt;&lt;br&gt;&lt;b&gt;notificacoes.status_envio&lt;/b&gt;&lt;br&gt;PENDENTE · ENVIADA · FALHA_ENVIO&lt;br&gt;&lt;br&gt;&lt;b&gt;notificacoes.tipo_conteudo_notificacao&lt;/b&gt;&amp;nbsp;&lt;i&gt;(V3)&lt;/i&gt;&lt;br&gt;MUDANCA_STATUS_OS ·&lt;br&gt;SOLICITACAO_APROVACAO_ORCAMENTO_OS ·&lt;br&gt;DECISAO_ORCAMENTO_OS&lt;br&gt;&lt;br&gt;&lt;span style=&quot;color:#C62828&quot;&gt;Mudar o enum da aplicação sem migration nova quebra a inserção em runtime.&lt;/span&gt;" style="text;html=1;align=left;verticalAlign=top;fontSize=9;fontColor=#5D4037;whiteSpace=wrap;" vertex="1" parent="1">
-          <mxGeometry x="470" y="728" width="348" height="394" as="geometry"/>
-        </mxCell>
-        <mxCell id="nota_aud" value="Sem relacionamento declarado. &lt;b&gt;Deliberado&lt;/b&gt;: a trilha de auditoria precisa&lt;br&gt;sobreviver à remoção do usuário, por isso responsavel_acao é varchar(36)&lt;br&gt;sem FK. As duas únicas linhas com índice explícito do schema estão aqui." style="rounded=1;arcSize=6;whiteSpace=wrap;html=1;fillColor=#FFF5F5;strokeColor=#B85450;align=left;verticalAlign=middle;spacingLeft=10;fontSize=9;fontColor=#7F1D1D;" vertex="1" parent="1">
-          <mxGeometry x="1700" y="400" width="300" height="104" as="geometry"/>
-        </mxCell>
-        <mxCell id="nota_raiz" value="&lt;b&gt;Raiz transacional.&lt;/b&gt; Orçamento, itens e insumos&lt;br&gt;só existem em função da ordem de serviço.&lt;br&gt;&lt;b&gt;usuarios&lt;/b&gt; é a única entidade referenciada por quase&lt;br&gt;todo o modelo: cliente, mecânico responsável e&lt;br&gt;destinatário de notificação são o mesmo registro&lt;br&gt;em papéis diferentes, distinguidos por usuario_roles." style="rounded=1;arcSize=6;whiteSpace=wrap;html=1;fillColor=#F1F8E9;strokeColor=#82B366;align=left;verticalAlign=middle;spacingLeft=10;fontSize=9;fontColor=#1B5E20;" vertex="1" parent="1">
-          <mxGeometry x="1700" y="530" width="300" height="112" as="geometry"/>
-        </mxCell>
         <mxCell id="e1" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;jettySize=auto;orthogonalLoop=1;startArrow=ERone;startFill=0;endArrow=ERmany;endFill=0;strokeWidth=1.4;strokeColor=#37474F;dashed=0;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="r_usuarios_0" target="r_usuario_roles_0">
           <mxGeometry relative="1" as="geometry">
             <Array as="points">
@@ -750,99 +741,6 @@
         </mxCell>
         <mxCell id="gr_c15_4" value="não — M-05, deliberado" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#F7F9FA;strokeColor=#CFD8DC;align=left;verticalAlign=middle;spacingLeft=6;fontSize=9;fontColor=#37474F;" vertex="1" parent="1">
           <mxGeometry x="1000" y="1620" width="220" height="22" as="geometry"/>
-        </mxCell>
-        <mxCell id="gd" value="Divergências conhecidas — nenhuma corrigida; correção é migration nova" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#B85450;strokeColor=#B85450;fontSize=11;fontStyle=1;fontColor=#FFFFFF;verticalAlign=middle;align=left;spacingLeft=8;" vertex="1" parent="1">
-          <mxGeometry x="1260" y="1240" width="740" height="26" as="geometry"/>
-        </mxCell>
-        <mxCell id="gd_h0" value="#" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ECEFF1;strokeColor=#B0BEC5;align=left;verticalAlign=middle;spacingLeft=6;fontSize=9;fontStyle=1;fontColor=#37474F;" vertex="1" parent="1">
-          <mxGeometry x="1260" y="1266" width="60" height="24" as="geometry"/>
-        </mxCell>
-        <mxCell id="gd_h1" value="Divergência" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ECEFF1;strokeColor=#B0BEC5;align=left;verticalAlign=middle;spacingLeft=6;fontSize=9;fontStyle=1;fontColor=#37474F;" vertex="1" parent="1">
-          <mxGeometry x="1320" y="1266" width="340" height="24" as="geometry"/>
-        </mxCell>
-        <mxCell id="gd_h2" value="Consequência" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ECEFF1;strokeColor=#B0BEC5;align=left;verticalAlign=middle;spacingLeft=6;fontSize=9;fontStyle=1;fontColor=#37474F;" vertex="1" parent="1">
-          <mxGeometry x="1660" y="1266" width="340" height="24" as="geometry"/>
-        </mxCell>
-        <mxCell id="gd_c0_0" value="M-01" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#CFD8DC;align=left;verticalAlign=middle;spacingLeft=6;fontSize=9;fontColor=#37474F;" vertex="1" parent="1">
-          <mxGeometry x="1260" y="1290" width="60" height="30" as="geometry"/>
-        </mxCell>
-        <mxCell id="gd_c0_1" value="ordem_servico_insumos.insumo_id é varchar(255); insumos.id é uuid" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#CFD8DC;align=left;verticalAlign=middle;spacingLeft=6;fontSize=9;fontColor=#37474F;" vertex="1" parent="1">
-          <mxGeometry x="1320" y="1290" width="340" height="30" as="geometry"/>
-        </mxCell>
-        <mxCell id="gd_c0_2" value="impede a FK — insumo inexistente é aceito na OS" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#CFD8DC;align=left;verticalAlign=middle;spacingLeft=6;fontSize=9;fontColor=#37474F;" vertex="1" parent="1">
-          <mxGeometry x="1660" y="1290" width="340" height="30" as="geometry"/>
-        </mxCell>
-        <mxCell id="gd_c1_0" value="M-02" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#F7F9FA;strokeColor=#CFD8DC;align=left;verticalAlign=middle;spacingLeft=6;fontSize=9;fontColor=#37474F;" vertex="1" parent="1">
-          <mxGeometry x="1260" y="1320" width="60" height="30" as="geometry"/>
-        </mxCell>
-        <mxCell id="gd_c1_1" value="mecanicos.usuario_id é PK sem FK para usuarios" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#F7F9FA;strokeColor=#CFD8DC;align=left;verticalAlign=middle;spacingLeft=6;fontSize=9;fontColor=#37474F;" vertex="1" parent="1">
-          <mxGeometry x="1320" y="1320" width="340" height="30" as="geometry"/>
-        </mxCell>
-        <mxCell id="gd_c1_2" value="mecânico órfão é possível" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#F7F9FA;strokeColor=#CFD8DC;align=left;verticalAlign=middle;spacingLeft=6;fontSize=9;fontColor=#37474F;" vertex="1" parent="1">
-          <mxGeometry x="1660" y="1320" width="340" height="30" as="geometry"/>
-        </mxCell>
-        <mxCell id="gd_c2_0" value="M-03" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#CFD8DC;align=left;verticalAlign=middle;spacingLeft=6;fontSize=9;fontColor=#37474F;" vertex="1" parent="1">
-          <mxGeometry x="1260" y="1350" width="60" height="30" as="geometry"/>
-        </mxCell>
-        <mxCell id="gd_c2_1" value="notificacoes.destinatario_id sem FK" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#CFD8DC;align=left;verticalAlign=middle;spacingLeft=6;fontSize=9;fontColor=#37474F;" vertex="1" parent="1">
-          <mxGeometry x="1320" y="1350" width="340" height="30" as="geometry"/>
-        </mxCell>
-        <mxCell id="gd_c2_2" value="notificação para destinatário inexistente é aceita" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#CFD8DC;align=left;verticalAlign=middle;spacingLeft=6;fontSize=9;fontColor=#37474F;" vertex="1" parent="1">
-          <mxGeometry x="1660" y="1350" width="340" height="30" as="geometry"/>
-        </mxCell>
-        <mxCell id="gd_c3_0" value="M-04" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#F7F9FA;strokeColor=#CFD8DC;align=left;verticalAlign=middle;spacingLeft=6;fontSize=9;fontColor=#37474F;" vertex="1" parent="1">
-          <mxGeometry x="1260" y="1380" width="60" height="30" as="geometry"/>
-        </mxCell>
-        <mxCell id="gd_c3_1" value="notificacao_copias.usuario_id sem FK" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#F7F9FA;strokeColor=#CFD8DC;align=left;verticalAlign=middle;spacingLeft=6;fontSize=9;fontColor=#37474F;" vertex="1" parent="1">
-          <mxGeometry x="1320" y="1380" width="340" height="30" as="geometry"/>
-        </mxCell>
-        <mxCell id="gd_c3_2" value="cópia para usuário inexistente é aceita" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#F7F9FA;strokeColor=#CFD8DC;align=left;verticalAlign=middle;spacingLeft=6;fontSize=9;fontColor=#37474F;" vertex="1" parent="1">
-          <mxGeometry x="1660" y="1380" width="340" height="30" as="geometry"/>
-        </mxCell>
-        <mxCell id="gd_c4_0" value="M-05" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#CFD8DC;align=left;verticalAlign=middle;spacingLeft=6;fontSize=9;fontColor=#37474F;" vertex="1" parent="1">
-          <mxGeometry x="1260" y="1410" width="60" height="30" as="geometry"/>
-        </mxCell>
-        <mxCell id="gd_c4_1" value="auditorias.responsavel_acao varchar(36) sem FK" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#CFD8DC;align=left;verticalAlign=middle;spacingLeft=6;fontSize=9;fontColor=#37474F;" vertex="1" parent="1">
-          <mxGeometry x="1320" y="1410" width="340" height="30" as="geometry"/>
-        </mxCell>
-        <mxCell id="gd_c4_2" value="deliberado — a trilha sobrevive ao usuário" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#CFD8DC;align=left;verticalAlign=middle;spacingLeft=6;fontSize=9;fontColor=#37474F;" vertex="1" parent="1">
-          <mxGeometry x="1660" y="1410" width="340" height="30" as="geometry"/>
-        </mxCell>
-        <mxCell id="gd_c5_0" value="M-06" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#F7F9FA;strokeColor=#CFD8DC;align=left;verticalAlign=middle;spacingLeft=6;fontSize=9;fontColor=#37474F;" vertex="1" parent="1">
-          <mxGeometry x="1260" y="1440" width="60" height="30" as="geometry"/>
-        </mxCell>
-        <mxCell id="gd_c5_1" value="veiculos.ativo é varchar CHECK (S,N); os demais ativo são boolean" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#F7F9FA;strokeColor=#CFD8DC;align=left;verticalAlign=middle;spacingLeft=6;fontSize=9;fontColor=#37474F;" vertex="1" parent="1">
-          <mxGeometry x="1320" y="1440" width="340" height="30" as="geometry"/>
-        </mxCell>
-        <mxCell id="gd_c5_2" value="mesmo conceito com duas representações" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#F7F9FA;strokeColor=#CFD8DC;align=left;verticalAlign=middle;spacingLeft=6;fontSize=9;fontColor=#37474F;" vertex="1" parent="1">
-          <mxGeometry x="1660" y="1440" width="340" height="30" as="geometry"/>
-        </mxCell>
-        <mxCell id="gd_c6_0" value="M-07" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#CFD8DC;align=left;verticalAlign=middle;spacingLeft=6;fontSize=9;fontColor=#37474F;" vertex="1" parent="1">
-          <mxGeometry x="1260" y="1470" width="60" height="30" as="geometry"/>
-        </mxCell>
-        <mxCell id="gd_c6_1" value="PK de veiculos chama-se veiculo_id; nas demais, id" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#CFD8DC;align=left;verticalAlign=middle;spacingLeft=6;fontSize=9;fontColor=#37474F;" vertex="1" parent="1">
-          <mxGeometry x="1320" y="1470" width="340" height="30" as="geometry"/>
-        </mxCell>
-        <mxCell id="gd_c6_2" value="quebra a convenção de nomenclatura" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#CFD8DC;align=left;verticalAlign=middle;spacingLeft=6;fontSize=9;fontColor=#37474F;" vertex="1" parent="1">
-          <mxGeometry x="1660" y="1470" width="340" height="30" as="geometry"/>
-        </mxCell>
-        <mxCell id="gd_c7_0" value="M-08" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#F7F9FA;strokeColor=#CFD8DC;align=left;verticalAlign=middle;spacingLeft=6;fontSize=9;fontColor=#37474F;" vertex="1" parent="1">
-          <mxGeometry x="1260" y="1500" width="60" height="30" as="geometry"/>
-        </mxCell>
-        <mxCell id="gd_c7_1" value="nenhuma FK tem índice explícito" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#F7F9FA;strokeColor=#CFD8DC;align=left;verticalAlign=middle;spacingLeft=6;fontSize=9;fontColor=#37474F;" vertex="1" parent="1">
-          <mxGeometry x="1320" y="1500" width="340" height="30" as="geometry"/>
-        </mxCell>
-        <mxCell id="gd_c7_2" value="JOIN e verificação varrem a tabela filha — aparece como latência" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#F7F9FA;strokeColor=#CFD8DC;align=left;verticalAlign=middle;spacingLeft=6;fontSize=9;fontColor=#37474F;" vertex="1" parent="1">
-          <mxGeometry x="1660" y="1500" width="340" height="30" as="geometry"/>
-        </mxCell>
-        <mxCell id="gd_c8_0" value="M-09" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#CFD8DC;align=left;verticalAlign=middle;spacingLeft=6;fontSize=9;fontColor=#37474F;" vertex="1" parent="1">
-          <mxGeometry x="1260" y="1530" width="60" height="30" as="geometry"/>
-        </mxCell>
-        <mxCell id="gd_c8_1" value="nenhuma FK declara ON DELETE" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#CFD8DC;align=left;verticalAlign=middle;spacingLeft=6;fontSize=9;fontColor=#37474F;" vertex="1" parent="1">
-          <mxGeometry x="1320" y="1530" width="340" height="30" as="geometry"/>
-        </mxCell>
-        <mxCell id="gd_c8_2" value="NO ACTION — remover OS com itens falha sem mensagem de domínio" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#CFD8DC;align=left;verticalAlign=middle;spacingLeft=6;fontSize=9;fontColor=#37474F;" vertex="1" parent="1">
-          <mxGeometry x="1660" y="1530" width="340" height="30" as="geometry"/>
         </mxCell>
       </root>
     </mxGraphModel>
