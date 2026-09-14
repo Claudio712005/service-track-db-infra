@@ -7,7 +7,7 @@ provisionado com Terraform, com uma configuração por ambiente.
 [service-track-api](https://github.com/Claudio712005/ServiceTrack-API) (aplicação),
 [service-track-aws-iac](https://github.com/Claudio712005/service-track-aws-iac) (rede, Kubernetes
 e borda) e [service-track-lambda](https://github.com/Claudio712005/service-track-lambda)
-(autenticação serverless).
+(autenticação serverless). 
 
 ---
 
