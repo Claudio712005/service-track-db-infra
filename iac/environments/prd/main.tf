@@ -1,4 +1,8 @@
+data "aws_caller_identity" "atual" {}
+
 locals {
+  state_bucket = var.state_bucket != "" ? var.state_bucket : "servicetrack-tfstate-${data.aws_caller_identity.atual.account_id}"
+
   project     = "servicetrack"
   environment = "prd"
   name        = "${local.project}-${local.environment}"
@@ -8,7 +12,7 @@ data "terraform_remote_state" "network" {
   backend = "s3"
 
   config = {
-    bucket = var.state_bucket
+    bucket = local.state_bucket
     key    = "servicetrack/${local.environment}-network/terraform.tfstate"
     region = var.region
   }
