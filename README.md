@@ -225,14 +225,15 @@ Nenhuma está corrigida: correção de schema é migration nova, e migrations s�
 - Terraform >= 1.10.0
 - AWS CLI autenticada — as credenciais da conta educacional **expiram a cada laboratório**
 - `psql` para os scripts operacionais
-- Bucket S3 do backend já existente
+- Bucket S3 do backend já existente (`servicetrack-tfstate-<conta>`, criado pelo `aws-iac`)
+- Credencial AWS válida **antes** do `init`: o nome do bucket vem da conta logada, e não há conta escrita no código (`DB-ADR-007`)
 - Rede do ambiente já aplicada (fase 1)
 
 ## Uso local
 
 ```bash
 cd iac/environments/hml
-terraform init
+terraform init -backend-config="bucket=servicetrack-tfstate-$(aws sts get-caller-identity --query Account --output text)"
 terraform plan
 terraform apply
 
