@@ -139,8 +139,14 @@ jobs:
           aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
           aws-region: ${{ env.AWS_REGION }}
 
+      - name: Descobrir o bucket de state
+        run: |
+          CONTA="$(aws sts get-caller-identity --query Account --output text)"
+          echo "BUCKET_DE_STATE=servicetrack-tfstate-$CONTA" >> "$GITHUB_ENV"
+          echo "backend em s3://servicetrack-tfstate-$CONTA"
+
       - name: terraform init
-        run: terraform init -input=false
+        run: terraform init -input=false -backend-config="bucket=$BUCKET_DE_STATE"
 
       - name: Conferir se a rede do ambiente ja foi aplicada
         run: |
