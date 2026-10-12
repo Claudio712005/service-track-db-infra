@@ -3,11 +3,29 @@
 Infraestrutura do banco de dados gerenciado do ServiceTrack: PostgreSQL no Amazon RDS,
 provisionado com Terraform, com uma configuração por ambiente.
 
-É um dos quatro repositórios do sistema. Os outros são
-[service-track-api](https://github.com/Claudio712005/ServiceTrack-API) (aplicação),
+> ## ⚠️ Este banco não é mais o banco do sistema
+>
+> Na Fase 4 **cada microsserviço passou a ter o próprio RDS**, declarado no `infra/terraform/` do
+> seu repositório: `st_cat` no catálogo, `st_usu` no usuários-veículos, `st_ord` no ordens,
+> `st_chk` no checkout. Nenhum deles usa este.
+>
+> O que sobrou aqui é o banco do **monólito da Fase 2** (`service-track-api`, que será arquivado)
+> e o banco que a **Lambda de autenticação** lê — e esta só existe com
+> `habilitar_autenticacao = true` no `service-track-aws-iac`, que é `false` por padrão.
+>
+> **Consequência prática:** com a autenticação desligada, `apply` deste repositório não é
+> pré-requisito de nada. A ordem "rede → banco → stack" vale a partir do momento em que a
+> autenticação é ligada.
+
+É um dos repositórios do sistema. Os microsserviços da Fase 4 vivem em
+[service-track-catalogo](https://github.com/Claudio712005/service-track-catalogo),
+[service-track-usuarios-veiculos](https://github.com/Claudio712005/service-track-usuarios-veiculos),
+[service-track-ordens](https://github.com/Claudio712005/service-track-ordens),
+[service-track-checkout](https://github.com/Claudio712005/service-track-checkout) e
+[service-track-bff](https://github.com/Claudio712005/service-track-bff); a plataforma em
 [service-track-aws-iac](https://github.com/Claudio712005/service-track-aws-iac) (rede, Kubernetes
-e borda) e [service-track-lambda](https://github.com/Claudio712005/service-track-lambda)
-(autenticação serverless).
+e borda) e a autenticação em
+[service-track-lambda](https://github.com/Claudio712005/service-track-lambda).
 
 ---
 
